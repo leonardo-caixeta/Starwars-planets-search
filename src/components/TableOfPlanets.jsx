@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react';
+import apiFetch from '../funcs/Fetch';
 
-async function TableOfPlanets() {
+function TableOfPlanets() {
   const [data, setData] = useState([]);
-  const getData = async () => {
-    const apiData = await fetch('https://swapi.dev/api/planets')
-      .then((res) => res.json());
-    setData(apiData);
-  };
+
   useEffect(() => {
-    getData();
-    console.log(data);
+    const apiData = apiFetch();
+    setData(apiData);
   }, []);
+
   return (
     <p>nada</p>
   );
