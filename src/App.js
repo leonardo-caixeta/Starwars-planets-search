@@ -1,10 +1,13 @@
 import React from 'react';
 import './App.css';
 import TableOfPlanets from './components/TableOfPlanets';
+import FetchProvider from './context/FetchProvider';
 
 function App() {
   return (
-    <TableOfPlanets />
+    <FetchProvider>
+      <TableOfPlanets />
+    </FetchProvider>
   );
 }
 
