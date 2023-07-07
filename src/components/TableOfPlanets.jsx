@@ -1,5 +1,6 @@
 import React, { useContext, useMemo, useState } from 'react';
 import fetchContext from '../context/FetchContext';
+import HeaderTable from './HeaderTable';
 
 function TableOfPlanets() {
   const { data } = useContext(fetchContext);
@@ -122,23 +123,7 @@ function TableOfPlanets() {
         ))
       }
       <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Climate</th>
-            <th>Terrain</th>
-            <th>Population</th>
-            <th>Diameter</th>
-            <th>Gravity</th>
-            <th>Orbital Period</th>
-            <th>Rotation Period</th>
-            <th>Surface Water</th>
-            <th>Films</th>
-            <th>Created</th>
-            <th>Edited</th>
-            <th>URL</th>
-          </tr>
-        </thead>
+        <HeaderTable />
         <tbody>
           {
             filterResults.length
