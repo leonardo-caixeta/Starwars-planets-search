@@ -3,41 +3,62 @@ import fetchContext from '../context/FetchContext';
 
 function TableOfPlanets() {
   const { data } = useContext(fetchContext);
-  const [filterText, setFilterText] = useState('');
 
+  const [filterText, setFilterText] = useState('');
   const [filterColumn, setFilterColumn] = useState('population');
   const [filterComparison, setFilterComparison] = useState('maior que');
   const [filterValue, setFilterValue] = useState(0);
   const [filterResults, setFilterResults] = useState([]);
+
+  const [idNum, setIdNum] = useState(0);
+  const [numberOfFilters, setNumberOfFilters] = useState([]);
 
   const filterByName = useMemo(() => (
     data.filter((el) => el.name.toLowerCase()
       .includes(filterText.toLowerCase()))
   ), [data, filterText]);
 
-  const numericFilter = () => {
-    switch (filterComparison) {
-    case 'maior que':
-      setFilterResults(filterByName.filter((el) => (
-        el[filterColumn] !== 'unknown' && Number(el[filterColumn]) > filterValue
-      )));
-      break;
+  const aplyAllFilters = () => {
+    const filtersToAply = [
+      ...numberOfFilters,
+      {
+        id: idNum,
+        column: filterColumn,
+        comparison: filterComparison,
+        value: filterValue,
+      },
+    ];
 
-    case 'menor que':
-      setFilterResults(filterByName.filter((el) => (
-        el[filterColumn] !== 'unknown' && Number(el[filterColumn]) < filterValue
-      )));
+    let allFiltersAplyed = filterByName;
 
-      break;
+    filtersToAply.forEach((filter) => {
+      switch (filter.comparison) {
+      case 'maior que':
+        allFiltersAplyed = allFiltersAplyed.filter((el) => (
+          el[filter.column] !== 'unknown' && Number(el[filter.column]) > filter.value
+        ));
+        break;
 
-    case 'igual a':
-      setFilterResults(filterByName.filter((el) => (
-        el[filterColumn] !== 'unknown' && Number(el[filterColumn]) === filterValue
-      )));
+      case 'menor que':
+        allFiltersAplyed = allFiltersAplyed.filter((el) => (
+          el[filter.column] !== 'unknown' && Number(el[filter.column]) < filter.value
+        ));
 
-      break;
-    default: setFilterResults(filterByName);
-    }
+        break;
+
+      case 'igual a':
+        allFiltersAplyed = allFiltersAplyed.filter((el) => (
+          el[filter.column] !== 'unknown' && Number(el[filter.column]) === filter.value
+        ));
+
+        break;
+      default:
+      }
+    });
+
+    setFilterResults(allFiltersAplyed);
+    setNumberOfFilters(filtersToAply);
+    setIdNum(idNum + 1);
   };
 
   return (
@@ -90,11 +111,16 @@ function TableOfPlanets() {
         <button
           data-testid="button-filter"
           id="button-filter"
-          onClick={ numericFilter }
+          onClick={ aplyAllFilters }
         >
           Filtre
         </button>
       </label>
+      {
+        numberOfFilters && numberOfFilters.map((info) => (
+          <p key={ info.id }>{ `${info.column} ${info.comparison} ${info.value}` }</p>
+        ))
+      }
       <table>
         <thead>
           <tr>
