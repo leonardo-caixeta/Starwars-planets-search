@@ -2,6 +2,20 @@ import React, { useContext, useMemo, useState } from 'react';
 import fetchContext from '../context/FetchContext';
 import HeaderTable from './HeaderTable';
 
+const columnOptions = [
+  'population',
+  'orbital_period',
+  'diameter',
+  'rotation_period',
+  'surface_water',
+];
+
+const comparisonOptions = [
+  'maior que',
+  'menor que',
+  'igual a',
+];
+
 function TableOfPlanets() {
   const { data } = useContext(fetchContext);
 
@@ -10,6 +24,11 @@ function TableOfPlanets() {
   const [filterComparison, setFilterComparison] = useState('maior que');
   const [filterValue, setFilterValue] = useState(0);
   const [filterResults, setFilterResults] = useState([]);
+  const [columnSelectsOptions, setColumnSelectsOptions] = useState(columnOptions);
+  const [
+    comparisonSelectsOptions,
+    setComparisonSelectsOptions,
+  ] = useState(comparisonOptions);
 
   const [idNum, setIdNum] = useState(0);
   const [numberOfFilters, setNumberOfFilters] = useState([]);
@@ -29,6 +48,13 @@ function TableOfPlanets() {
         value: filterValue,
       },
     ];
+
+    const filteredColumn = columnSelectsOptions.filter((opt) => opt !== filterColumn);
+    const filteredComparison = comparisonSelectsOptions
+      .filter((opt) => opt !== filterComparison);
+
+    setColumnSelectsOptions(filteredColumn);
+    setComparisonSelectsOptions(filteredComparison);
 
     let allFiltersAplyed = filterByName;
 
@@ -79,22 +105,23 @@ function TableOfPlanets() {
         value={ filterColumn }
         onChange={ ({ target }) => setFilterColumn(target.value) }
       >
-        <option value="population">population</option>
-        <option value="orbital_period">orbital_period</option>
-        <option value="diameter">diameter</option>
-        <option value="rotation_period">rotation_period</option>
-        <option value="surface_water">surface_water</option>
+        {
+          columnSelectsOptions.map((opt, index) => (
+            <option key={ index } value={ opt }>{ opt }</option>
+          ))
+        }
       </select>
 
       <select
         data-testid="comparison-filter"
         value={ filterComparison }
         onChange={ ({ target }) => setFilterComparison(target.value) }
-
       >
-        <option value="maior que">maior que</option>
-        <option value="menor que">menor que</option>
-        <option value="igual a">igual a</option>
+        {
+          comparisonSelectsOptions.map((opt, index) => (
+            <option key={ index } value={ opt }>{ opt }</option>
+          ))
+        }
       </select>
 
       <label htmlFor="value-filter">
@@ -117,9 +144,24 @@ function TableOfPlanets() {
           Filtre
         </button>
       </label>
+
+      <label htmlFor="button-remove-filters">
+        <button
+          id="button-remove-filters"
+          data-testid="button-remove-filters"
+        >
+          Remove all filters
+        </button>
+      </label>
       {
         numberOfFilters && numberOfFilters.map((info) => (
-          <p key={ info.id }>{ `${info.column} ${info.comparison} ${info.value}` }</p>
+          <div
+            key={ info.id }
+            data-testid="filter"
+          >
+            <p>{ `${info.column} ${info.comparison} ${info.value}` }</p>
+            <button>❌</button>
+          </div>
         ))
       }
       <table>

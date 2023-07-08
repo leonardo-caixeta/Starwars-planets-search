@@ -51,8 +51,7 @@ describe('Testes do componente TableOfPlanets',() => {
       userEvent.click(filterButton);
     });
 
-    expect(screen.getByText(/population igual a 1000000000000/i))
-    .toBeInTheDocument();
+    expect(screen.getByText(/population igual a 1000000000000/i)).toBeInTheDocument();
 
     expect(await screen.findByText(/coruscant/i, {}, { timeout: 3000 })).toBeInTheDocument();
 
@@ -77,7 +76,6 @@ describe('Testes do componente TableOfPlanets',() => {
     });
 
     expect(screen.getByText(/tatooine/i, {}, { timeout: 3000 })).toBeInTheDocument();
-
   });
   it('Teste de filtro por texto', async () => {
     render(<App />);
