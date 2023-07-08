@@ -1,24 +1,10 @@
 import React, { useContext, useMemo, useState } from 'react';
 import fetchContext from '../context/FetchContext';
 import HeaderTable from './HeaderTable';
-
-const columnOptions = [
-  'population',
-  'orbital_period',
-  'diameter',
-  'rotation_period',
-  'surface_water',
-];
-
-const comparisonOptions = [
-  'maior que',
-  'menor que',
-  'igual a',
-];
+import { columnOptions, comparisonOptions } from '../data';
 
 function TableOfPlanets() {
   const { data } = useContext(fetchContext);
-
   const [filterText, setFilterText] = useState('');
   const [filterColumn, setFilterColumn] = useState('population');
   const [filterComparison, setFilterComparison] = useState('maior que');
@@ -29,7 +15,6 @@ function TableOfPlanets() {
     comparisonSelectsOptions,
     setComparisonSelectsOptions,
   ] = useState(comparisonOptions);
-
   const [idNum, setIdNum] = useState(0);
   const [numberOfFilters, setNumberOfFilters] = useState([]);
 
@@ -38,7 +23,48 @@ function TableOfPlanets() {
       .includes(filterText.toLowerCase()))
   ), [data, filterText]);
 
-  const aplyAllFilters = () => {
+  const allFiltersAplyed = useMemo(() => {
+    let filteredData = filterByName;
+
+    numberOfFilters.forEach((filter) => {
+      switch (filter.comparison) {
+      case 'maior que':
+        filteredData = filteredData.filter(
+          (el) => el[filter.column] !== 'unknown'
+          && Number(el[filter.column]) > filter.value,
+        );
+        break;
+      case 'menor que':
+        filteredData = filteredData.filter(
+          (el) => el[filter.column] !== 'unknown'
+            && Number(el[filter.column]) < filter.value,
+        );
+        break;
+      case 'igual a':
+        filteredData = filteredData.filter(
+          (el) => el[filter.column] !== 'unknown'
+            && Number(el[filter.column]) === filter.value,
+        );
+        break;
+      default:
+        break;
+      }
+    });
+    setFilterResults(filteredData);
+    return filteredData;
+  }, [filterByName, numberOfFilters]);
+
+  const setHandleFilters = () => {
+    const filteredColumn = columnSelectsOptions.filter((opt) => opt !== filterColumn);
+    const filteredComparison = comparisonSelectsOptions
+      .filter((opt) => opt !== filterComparison);
+
+    setColumnSelectsOptions(filteredColumn);
+    setComparisonSelectsOptions(filteredComparison);
+    setFilterResults(allFiltersAplyed);
+  };
+
+  const aplyAllFilters = () => { // adiciona filtros
     const filtersToAply = [
       ...numberOfFilters,
       {
@@ -53,39 +79,36 @@ function TableOfPlanets() {
     const filteredComparison = comparisonSelectsOptions
       .filter((opt) => opt !== filterComparison);
 
+    setFilterColumn(filteredColumn[0]);
+    setFilterComparison(filteredComparison[0]);
     setColumnSelectsOptions(filteredColumn);
     setComparisonSelectsOptions(filteredComparison);
-
-    let allFiltersAplyed = filterByName;
-
-    filtersToAply.forEach((filter) => {
-      switch (filter.comparison) {
-      case 'maior que':
-        allFiltersAplyed = allFiltersAplyed.filter((el) => (
-          el[filter.column] !== 'unknown' && Number(el[filter.column]) > filter.value
-        ));
-        break;
-
-      case 'menor que':
-        allFiltersAplyed = allFiltersAplyed.filter((el) => (
-          el[filter.column] !== 'unknown' && Number(el[filter.column]) < filter.value
-        ));
-
-        break;
-
-      case 'igual a':
-        allFiltersAplyed = allFiltersAplyed.filter((el) => (
-          el[filter.column] !== 'unknown' && Number(el[filter.column]) === filter.value
-        ));
-
-        break;
-      default:
-      }
-    });
-
     setFilterResults(allFiltersAplyed);
     setNumberOfFilters(filtersToAply);
     setIdNum(idNum + 1);
+  };
+
+  const removeAllFilters = () => { // remove todos os filtros
+    setNumberOfFilters([]);
+    setIdNum(0);
+    setFilterText('');
+    setFilterColumn('population');
+    setFilterValue(0);
+    setFilterResults([]);
+    setColumnSelectsOptions(columnOptions);
+    setComparisonSelectsOptions(comparisonOptions);
+  };
+
+  const removeSelectedFilter = (filterId) => { // remove filtro selecionado
+    const remove = numberOfFilters.filter((el) => (
+      el.id !== filterId
+    ));
+    setNumberOfFilters(remove);
+    setColumnSelectsOptions(columnOptions);
+    setComparisonSelectsOptions(comparisonOptions);
+    setHandleFilters();
+    console.log(numberOfFilters);
+    console.log(remove);
   };
 
   return (
@@ -149,6 +172,7 @@ function TableOfPlanets() {
         <button
           id="button-remove-filters"
           data-testid="button-remove-filters"
+          onClick={ removeAllFilters }
         >
           Remove all filters
         </button>
@@ -160,7 +184,7 @@ function TableOfPlanets() {
             data-testid="filter"
           >
             <p>{ `${info.column} ${info.comparison} ${info.value}` }</p>
-            <button>❌</button>
+            <button onClick={ () => removeSelectedFilter(info.id) }>❌</button>
           </div>
         ))
       }
